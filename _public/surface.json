@@ -1,0 +1,62 @@
+{
+  "version": 1,
+  "pages": [
+    {
+      "slug": "feedback-geben",
+      "component": "FeedbackGeben",
+      "title": "Feedback geben",
+      "endpoints": [
+        {
+          "entity": "interaktionen",
+          "op": "list",
+          "fields": [
+            "frage",
+            "erlaeuterung"
+          ],
+          "scope": "r.v_aktiv == True",
+          "scope_description": "zeigt nur die gerade aktive Interaktion (aktiv = ja)",
+          "max_records": 20
+        },
+        {
+          "entity": "feedbacks",
+          "op": "create",
+          "fields": [
+            "interaktion",
+            "feedbacktext",
+            "kuerzel",
+            "absende_kennung"
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "abschlussbewertung",
+      "component": "Abschlussbewertung",
+      "title": "Abschlussbewertung",
+      "endpoints": [
+        {
+          "entity": "veranstaltungen",
+          "op": "list",
+          "fields": [
+            "titel",
+            "datum"
+          ],
+          "max_records": 200
+        },
+        {
+          "entity": "abschlussbewertungen",
+          "op": "create",
+          "fields": [
+            "veranstaltung",
+            "kuerzel",
+            "besonders_toll",
+            "verbesserungen",
+            "referenzstatement",
+            "email",
+            "einwilligung"
+          ]
+        }
+      ]
+    }
+  ]
+}

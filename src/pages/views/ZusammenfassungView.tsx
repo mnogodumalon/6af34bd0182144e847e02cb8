@@ -7,9 +7,11 @@
  * EDITS   zusammenfassungstext and ki_antwort are edited ON this view (autosave).
  * PURPOSE Führt alle Feedbacks einer Interaktion in ein großes, bearbeitbares Textfeld zusammen, das bildschirmfüllend mit den Teilnehmenden durchgegangen, kopiert und mit der Antwort der KI ergänzt wird.
  */
+import { useEffect, useRef } from 'react';
 import { useLiveRecords } from '@/hooks/useLiveRecords';
 import { tx } from '@/i18n';
-import { LivingAppsService, extractRecordId } from '@/services/livingAppsService';
+import { LivingAppsService, extractRecordId, createRecordUrl } from '@/services/livingAppsService';
+import { APP_IDS } from '@/types/app';
 import { flowActionFor } from '@/config/plan';
 import { ViewTextEditor } from '@/components/blocks/ViewTextEditor';
 
@@ -19,18 +21,21 @@ export default function ZusammenfassungView() {
   const feedbacks = useLiveRecords('feedbacks', { intervalMs: 0, query: { filter: "r.v_interaktion is not None" } });
   const zusammenfassungen = useLiveRecords('zusammenfassungen', { intervalMs: 0, query: { filter: "r.v_interaktion is not None" } });
 
-  const interaktion = interaktionen.records.find(r => r.record_id === pinned) ?? null;
+  // the overview passes an interaktion id; a zusammenfassung id resolves to its interaktion
+  const pinnedZus = zusammenfassungen.records.find(z => z.record_id === pinned) ?? null;
+  const iid = interaktionen.records.some(r => r.record_id === pinned) ? pinned : (extractRecordId(pinnedZus?.fields.interaktion) ?? pinned);
+  const interaktion = interaktionen.records.find(r => r.record_id === iid) ?? null;
   const loaded = !interaktionen.loading && !feedbacks.loading && !zusammenfassungen.loading;
   const anyError = [interaktionen, feedbacks, zusammenfassungen].some(x => x.error);
   const mine = zusammenfassungen.records
-    .filter(z => extractRecordId(z.fields.interaktion) === pinned)
+    .filter(z => extractRecordId(z.fields.interaktion) === iid)
     .sort((a, b) => (b.createdat ?? '').localeCompare(a.createdat ?? ''));
   const zus = mine[0] ?? null;
 
   const compose = () => {
     if (!loaded || !interaktion) return null;
     const fb = feedbacks.records
-      .filter(f => extractRecordId(f.fields.interaktion) === pinned)
+      .filter(f => extractRecordId(f.fields.interaktion) === iid)
       .sort((a, b) => (a.createdat ?? '').localeCompare(b.createdat ?? ''));
     const parts = [
       interaktion.fields.vorprompt,
@@ -39,6 +44,40 @@ export default function ZusammenfassungView() {
     ].filter((p): p is string => !!p && p.trim() !== '');
     return parts.join('\n\n');
   };
+
+  // no Zusammenfassung yet → the view creates one (erstellt_am = now); compose() then fills it
+  const creating = useRef<string | null>(null);
+  const hasZus = !!zus;
+  const reloadZus = zusammenfassungen.reload;
+  useEffect(() => {
+    if (!loaded || anyError || !interaktion || hasZus || creating.current === iid) return;
+    creating.current = iid;
+    LivingAppsService.createZusammenfassungenEntry({
+      interaktion: createRecordUrl(APP_IDS.INTERAKTIONEN, iid),
+      erstellt_am: new Date().toISOString().slice(0, 16),
+    }).then(() => reloadZus()).catch(err => {
+      console.error('[ZusammenfassungView] create zusammenfassung:', err);
+      creating.current = null;
+    });
+  }, [loaded, anyError, interaktion, hasZus, iid, reloadZus]);
+
+  // a stored text that holds none of the current feedbacks was never composed from them
+  // (edits keep the feedback lines, so they are not touched) → compose it once on open
+  const refreshed = useRef<string | null>(null);
+  const zusId = zus?.record_id ?? null;
+  const zusText = String(zus?.fields.zusammenfassungstext ?? '');
+  useEffect(() => {
+    if (!loaded || anyError || !interaktion || !zusId || !zusText.trim() || refreshed.current === zusId) return;
+    const mineFb = feedbacks.records.filter(f => extractRecordId(f.fields.interaktion) === iid && (f.fields.feedbacktext ?? '').trim() !== '');
+    if (mineFb.length === 0 || mineFb.some(f => zusText.includes(f.fields.feedbacktext ?? ''))) return;
+    const next = compose();
+    if (!next) return;
+    refreshed.current = zusId;
+    LivingAppsService.updateZusammenfassungenEntry(zusId, { zusammenfassungstext: next })
+      .then(() => zusammenfassungen.apply(zusId, { zusammenfassungstext: next }))
+      .catch(err => { console.error('[ZusammenfassungView] compose:', err); refreshed.current = null; });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once per record, when its sources are ready
+  }, [loaded, anyError, interaktion, zusId, zusText, feedbacks.records, iid]);
 
   const kiGo = zus ? flowActionFor('zusammenfassungen', 'ki_antwort', zus.record_id) : null;
   const blocked = anyError ? tx('Die Daten konnten nicht geladen werden — es wird nichts zusammengeführt oder gespeichert.') : null;

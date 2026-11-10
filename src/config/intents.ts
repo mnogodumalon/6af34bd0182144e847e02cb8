@@ -20,6 +20,7 @@
 import type { ComponentType } from 'react';
 
 // <custom:intent-imports>
+import { IconPlayerPlay, IconListDetails, IconRobot } from '@tabler/icons-react';
 // </custom:intent-imports>
 
 export interface IntentLink {
@@ -42,6 +43,9 @@ export interface IntentLink {
 
 export const INTENTS: IntentLink[] = [
   // <custom:intents>
+  { path: '/intents/interaktion-aktivieren', label: { de: 'Interaktion aktivieren', en: 'Activate interaction' }, icon: IconPlayerPlay, description: 'Interaktion aktiv setzen und QR-Code zum Feedback-Formular öffnen' },
+  { path: '/intents/feedbacks-zusammenfassen', label: { de: 'Feedbacks zusammenfassen', en: 'Summarise feedback' }, icon: IconListDetails, description: 'Feedbacks einer Interaktion zu einem bearbeitbaren Text zusammenführen' },
+  { path: '/intents/ki-antwort-ablegen', label: { de: 'Antwort der KI ablegen', en: 'Store AI answer' }, icon: IconRobot, description: 'Antwort des Chatbots bei der Zusammenfassung ablegen' },
   // </custom:intents>
 ];
 
@@ -52,7 +56,7 @@ export const INTENTS: IntentLink[] = [
  * purpose — a scaffold update resets it to false (self-healing if Phase 2
  * never ran).
  */
-export const INTENTS_PENDING = true;
+export const INTENTS_PENDING = false;
 
 /**
  * When the Phase-1 bundle was deployed (ISO, set by the service together with
