@@ -1,0 +1,30 @@
+{
+  "pages": {
+    "en": {
+      "Aktiv": "Active",
+      "Aktiv: {0} — {1} zur aktiven Interaktion.": "Active: {0} — {1} for the active interaction.",
+      "Aktivieren": "Activate",
+      "Aktivieren & QR-Code öffnen": "Activate & open QR code",
+      "Antwort ablegen": "Save response",
+      "Bei jeder Veranstaltung ist eine Interaktion aktiv.": "Every event has an active interaction.",
+      "Erste Veranstaltung anlegen": "Create first event",
+      "Interaktion": "Interaction",
+      "KI-Antwort abgelegt": "AI response saved",
+      "KI-Antwort fehlt": "AI response missing",
+      "Keine Interaktion aktiv — Teilnehmende sehen noch nichts.": "No interaction active — participants don't see anything yet.",
+      "Lege deine erste Veranstaltung an und bereite die Interaktionen vor.": "Create your first event and prepare the interactions.",
+      "Letzte Zusammenfassungen": "Latest summaries",
+      "Neue Veranstaltung": "New event",
+      "Noch keine Abschlussbewertung eingegangen.": "No final rating received yet.",
+      "Noch keine Interaktion aktiv — wähle bei {0} die nächste aus.": "No interaction active yet — select the next one at {0}.",
+      "Noch keine Interaktion — lege den ersten Schritt an.": "No interaction yet — create the first step.",
+      "Noch keine Veranstaltung — lege sie an, dann folgen die Interaktionen.": "No event yet — create one, then the interactions follow.",
+      "Noch keine Zusammenfassung — starte sie bei einer Interaktion.": "No summary yet — start one from an interaction.",
+      "Ohne aktive Interaktion": "No active interaction",
+      "QR-Code zeigen": "Show QR code",
+      "Zusammenfassen": "Summarize",
+      "„{0}“ ist jetzt aktiv": "\"{0}\" is now active"
+    }
+  },
+  "v": 1
+}
